@@ -755,17 +755,17 @@
             
             .young-hee {
                 left: 8%;
-                bottom: 120px; /* Lower the characters to ground level */
+                bottom: 100px; /* Raised to better ground level for portrait */
             }
             
             .cheol-su {
                 right: 8%;
                 left: auto;
-                bottom: 120px; /* Lower the characters to ground level */
+                bottom: 100px; /* Raised to better ground level for portrait */
             }
             
             #character {
-                bottom: 120px; /* Match player position with rope holders */
+                bottom: 100px; /* Raised to match other characters at proper ground level */
             }
             
             #ui {
@@ -799,15 +799,15 @@
             }
             
             .young-hee {
-                bottom: 45px; /* Raised more to bring properly above ground */
+                bottom: 20px; /* Raised significantly - half character height above ground */
             }
             
             .cheol-su {
-                bottom: 45px; /* Raised more to bring properly above ground */
+                bottom: 20px; /* Raised significantly - half character height above ground */
             }
             
             #character {
-                bottom: 45px; /* Raised more to match other characters at ground level */
+                bottom: 20px; /* Raised significantly - half character height above ground */
             }
             
             #ui {
@@ -941,7 +941,7 @@
         <!-- Flexible rope using SVG -->
         <div id="rope">
             <svg id="ropeSvg" viewBox="0 0 600 150">
-                <path id="ropePath" class="rope-path" d="M 60 85 Q 300 90 540 85"></path>
+                <path id="ropePath" class="rope-path" d="M 60 70 Q 300 75 540 70"></path>
             </svg>
         </div>
 
@@ -1172,26 +1172,26 @@
             if (progress < 0.2) {
                 // Rope starting position and beginning to rise
                 const t = progress / 0.2;
-                pathData = `M 60 85 Q ${300 + t * 40} ${85 - t * 30} 540 85`; // Lowered to hand level
+                pathData = `M 60 70 Q ${300 + t * 40} ${70 - t * 30} 540 70`; // Adjusted to new hand level
             } else if (progress < 0.4) {
                 // Rope going up and over the top (safe zone)
                 const t = (progress - 0.2) / 0.2;
-                const controlY = 55 - t * 80; // Goes much higher over heads
-                pathData = `M 60 85 Q 340 ${controlY} 540 85`; // Start from hand level
+                const controlY = 40 - t * 80; // Goes much higher over heads
+                pathData = `M 60 70 Q 340 ${controlY} 540 70`; // Start from new hand level
             } else if (progress < 0.6) {
                 // Rope at the top (completely safe zone - high above heads)
                 const t = (progress - 0.4) / 0.2;
-                pathData = `M 60 85 Q 300 -40 540 85`; // Very high arc well above everything
+                pathData = `M 60 70 Q 300 -40 540 70`; // Very high arc well above everything
             } else if (progress < 0.8) {
                 // Rope starting to come down (still safe)
                 const t = (progress - 0.6) / 0.2;
                 const controlY = -40 + t * 80; // Gradually coming down from high position
-                pathData = `M 60 85 Q 260 ${controlY} 300 ${85 + t * 20} Q 340 ${controlY} 540 85`;
+                pathData = `M 60 70 Q 260 ${controlY} 300 ${70 + t * 20} Q 340 ${controlY} 540 70`;
             } else {
                 // Rope at bottom - DANGER ZONE (only last 20% of rotation)
                 const t = (progress - 0.8) / 0.2;
-                const bottomY = 105 + t * 50; // Sweeps at ground level (adjusted for new anchor)
-                pathData = `M 60 85 Q 180 100 300 ${bottomY} Q 420 100 540 85`; // From hand level
+                const bottomY = 90 + t * 50; // Sweeps at ground level (adjusted for raised characters)
+                pathData = `M 60 70 Q 180 85 300 ${bottomY} Q 420 85 540 70`; // From proper hand level
             }
             
             ropePath.setAttribute('d', pathData);
@@ -1251,7 +1251,7 @@
             clearInterval(timerInterval);
 
             // Reset rope to initial position
-            ropePath.setAttribute('d', 'M 60 85 Q 300 90 540 85');
+            ropePath.setAttribute('d', 'M 60 70 Q 300 75 540 70');
             resetRailwayLights();
             document.getElementById('finalScore').textContent = score;
             document.getElementById('gameOver').style.display = 'flex';
