@@ -737,7 +737,7 @@
                 max-width: 400px;
                 height: 50vh;
                 min-height: 300px;
-                margin-top: 50px; /* Reduced from 80px to close gap */
+                margin-top: 30px; /* Reduced from 50px for even tighter layout */
             }
             
             #rope {
@@ -791,23 +791,23 @@
         /* Landscape mode mobile optimization */
         @media (max-width: 800px) and (orientation: landscape) and (max-height: 600px) {
             #gameContainer {
-                width: 70vw;
-                height: 65vh;
+                width: 85vw; /* Increased from 70vw to take more screen space */
+                height: 75vh; /* Increased from 65vh to take more screen space */
                 margin: 0 auto;
                 position: relative;
-                top: 50px; /* Reduced from 80px to close gap */
+                top: 25px; /* Greatly reduced from 50px to minimize gap */
             }
             
             .young-hee {
-                bottom: 80px; /* Ensure heads are visible */
+                bottom: 60px; /* Raised from 80px to bring characters up */
             }
             
             .cheol-su {
-                bottom: 80px; /* Ensure heads are visible */
+                bottom: 60px; /* Raised from 80px to bring characters up */
             }
             
             #character {
-                bottom: 80px; /* Match all characters at same level */
+                bottom: 60px; /* Raised from 80px to match characters */
             }
             
             #ui {
@@ -831,7 +831,7 @@
             
             #instructions {
                 font-size: 14px;
-                top: 45px; /* Reduced from 60px to bring closer to UI */
+                top: 30px; /* Reduced from 45px to bring much closer to UI */
             }
             
             .timer {
@@ -858,7 +858,7 @@
         /* Prevent overlap on all mobile devices */
         @media (max-width: 800px) {
             body {
-                padding-top: 70px; /* Reduced from 100px for tighter layout */
+                padding-top: 50px; /* Reduced from 70px for much tighter layout */
             }
             
             #gameOverContent {
