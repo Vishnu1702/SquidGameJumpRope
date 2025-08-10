@@ -696,6 +696,104 @@
             transform: scale(1.05);
         }
 
+        /* Speed selection menu */
+        #speedSelection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #speedSelectionContent {
+            text-align: center;
+            color: white;
+            padding: 40px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8e8e);
+            border-radius: 20px;
+            border: 4px solid #2c5530;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+        }
+
+        #speedSelectionContent h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #2c5530;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        #speedSelectionContent p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #2c5530;
+            line-height: 1.4;
+        }
+
+        .speed-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .speed-option {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            padding: 12px 20px;
+            background: #00a86b;
+            color: white;
+            border: 3px solid #2c5530;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+            min-width: 120px;
+        }
+
+        .speed-option:hover {
+            background: #2c5530;
+            transform: scale(1.05);
+        }
+
+        .speed-option.selected {
+            background: #2c5530;
+            box-shadow: 0 0 15px rgba(44, 85, 48, 0.8);
+        }
+
+        /* Life lost message - Quick popup */
+        #lifeLostMessage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ff4444, #cc0000);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid #ffffff;
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.8);
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #lifeLostMessage.show {
+            opacity: 1;
+        }
+
         #instructions {
             position: fixed;
             top: 20px;
@@ -966,6 +1064,7 @@
     <div id="ui">
         <div>Score: <span id="score">0</span></div>
         <div>Speed: <span id="speed">1.0</span>x</div>
+        <div>Lives: <span id="lives">3</span> ❤️</div>
         <div>Time: <span id="timeLeft">01:00</span></div>
     </div>
 
@@ -1040,12 +1139,50 @@
         </div>
     </div>
 
+    <div id="speedSelection">
+        <div id="speedSelectionContent">
+            <h2>Select Starting Speed</h2>
+            <p>Choose your preferred speed level. The game will still increase speed every 2 points!</p>
+            <div class="speed-options">
+                <button class="speed-option selected" onclick="selectSpeed(1.0)" data-speed="1.0">
+                    <div>Beginner</div>
+                    <div style="font-size: 12px;">1.0x Speed</div>
+                </button>
+                <button class="speed-option" onclick="selectSpeed(1.25)" data-speed="1.25">
+                    <div>Normal</div>
+                    <div style="font-size: 12px;">1.25x Speed</div>
+                </button>
+                <button class="speed-option" onclick="selectSpeed(1.5)" data-speed="1.5">
+                    <div>Fast</div>
+                    <div style="font-size: 12px;">1.5x Speed</div>
+                </button>
+                <button class="speed-option" onclick="selectSpeed(1.75)" data-speed="1.75">
+                    <div>Expert</div>
+                    <div style="font-size: 12px;">1.75x Speed</div>
+                </button>
+                <button class="speed-option" onclick="selectSpeed(2.0)" data-speed="2.0">
+                    <div>Master</div>
+                    <div style="font-size: 12px;">2.0x Speed</div>
+                </button>
+            </div>
+            <button onclick="startGameWithSelectedSpeed()" style="font-size: 24px; padding: 20px 40px;">START GAME</button>
+        </div>
+    </div>
+
+    <div id="lifeLostMessage">
+        💥 HIT BY ROPE! 💥<br>
+        Lives: <span id="remainingLives">2</span>
+    </div>
+
     <script>
         // Game state
         let score = 0;
         let gameRunning = false;
         let ropeSpeed = 3; // seconds per rotation (faster start)
         let speedMultiplier = 1.0; // Direct speed multiplier for display
+        let selectedStartSpeed = 1.0; // Default starting speed multiplier
+        let baseRopeSpeed = 3; // Base rope speed (will be divided by speed multiplier)
+        let lives = 3; // Player gets 3 lives (2 extra chances)
         let character = document.getElementById('character');
         let rope = document.getElementById('rope');
         let ropePath = document.getElementById('ropePath');
@@ -1059,6 +1196,7 @@
         let gameStarted = false;
         let collisionEnabled = false; // Add collision delay
         let lastDangerZone = false; // Track if we were in danger zone last frame
+        let dangerZoneScored = false; // Track if we already gave a point for this danger zone
 
         // Audio context for sound effects
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1201,10 +1339,17 @@
             // This corresponds to when bottomY >= 135 (actual ground/feet level)
             const inDangerZone = progress > 0.94 && progress < 0.98;
 
+            // If we're entering danger zone, reset the scored flag
+            if (inDangerZone && !lastDangerZone) {
+                dangerZoneScored = false;
+            }
+
             // If we're in danger zone and player is not jumping, they fail
             if (inDangerZone && !isJumping) {
                 // Only trigger collision once per danger zone entry
                 if (!lastDangerZone) {
+                    dangerZoneScored = true; // Mark that this danger zone is resolved (no point awarded)
+                    
                     // Add visual feedback - character falls into water
                     const character = document.getElementById('character');
                     const waterSplash = document.getElementById('waterSplash');
@@ -1219,9 +1364,15 @@
 
                     // Game over after falling animation
                     setTimeout(() => {
-                        gameOver();
+                        loseLife();
                     }, 2000);
                 }
+            }
+
+            // If we're exiting danger zone and player survived (didn't get hit), award point
+            if (!inDangerZone && lastDangerZone && !dangerZoneScored) {
+                updateScore(); // Player successfully avoided the rope
+                dangerZoneScored = true; // Mark that we've scored for this rope cycle
             }
 
             // Update the danger zone tracking
@@ -1317,6 +1468,63 @@
             }, 3000);
         }
 
+        // Handle losing a life
+        function loseLife() {
+            lives--;
+            document.getElementById('lives').textContent = lives;
+
+            // Reset character and water splash animations
+            const character = document.getElementById('character');
+            const waterSplash = document.getElementById('waterSplash');
+            
+            character.classList.remove('character-falling');
+            waterSplash.classList.remove('active');
+
+            if (lives <= 0) {
+                // Game over - no more lives
+                gameOver();
+            } else {
+                // Show quick life lost message
+                const lifeLostMessage = document.getElementById('lifeLostMessage');
+                document.getElementById('remainingLives').textContent = lives;
+                
+                // Show the message
+                lifeLostMessage.classList.add('show');
+                
+                // Hide the message after 1 second and continue game
+                setTimeout(() => {
+                    lifeLostMessage.classList.remove('show');
+                }, 1000);
+                
+                // Brief pause and then continue
+                gameRunning = false;
+                clearInterval(gameLoop);
+                clearInterval(timerInterval);
+                
+                // Resume game after 1.2 seconds (allowing message to disappear)
+                setTimeout(() => {
+                    // Reset rope angle to give player a fresh start
+                    ropeAngle = 0;
+                    adjustRopeForOrientation();
+                    
+                    // Resume the game
+                    gameRunning = true;
+                    
+                    // Re-enable collision after a brief safe period
+                    collisionEnabled = false;
+                    setTimeout(() => {
+                        collisionEnabled = true;
+                    }, 1000); // 1 second grace period
+                    
+                    // Restart game loop and timer
+                    gameLoop = setInterval(updateRope, 1000 / 60);
+                    timerInterval = setInterval(updateTimer, 1000);
+                }, 1200);
+                
+                playGameOverSound();
+            }
+        }
+
         function gameOver() {
             gameRunning = false;
             clearInterval(gameLoop);
@@ -1339,22 +1547,47 @@
 
             // Increase speed more frequently every 2 points with smaller increments
             if (score % 2 === 0) {
-                speedMultiplier += 0.25; // 1.0x → 1.25x → 1.50x → 1.75x → 2.0x etc.
-                ropeSpeed = 3 / speedMultiplier; // Faster rotation
+                speedMultiplier += 0.25; // Increase from current speed level
+                ropeSpeed = baseRopeSpeed / speedMultiplier; // Faster rotation
                 document.getElementById('speed').textContent = speedMultiplier.toFixed(2) + 'x';
             }
+        }
+
+        // Speed selection functions
+        function selectSpeed(speed) {
+            selectedStartSpeed = speed;
+            
+            // Update visual selection
+            document.querySelectorAll('.speed-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-speed="${speed}"]`).classList.add('selected');
+        }
+
+        function startGameWithSelectedSpeed() {
+            // Hide speed selection menu
+            document.getElementById('speedSelection').style.display = 'none';
+            
+            // Start the game with selected speed
+            startGame();
+        }
+
+        function showSpeedSelection() {
+            document.getElementById('speedSelection').style.display = 'flex';
         }
 
         // Start game
         function startGame() {
             gameRunning = true;
             score = 0;
-            ropeSpeed = 3; // Faster start
-            speedMultiplier = 1.0; // Reset speed multiplier
+            lives = 3; // Reset lives to 3
+            ropeSpeed = baseRopeSpeed / selectedStartSpeed; // Apply selected starting speed
+            speedMultiplier = selectedStartSpeed; // Start with selected speed multiplier
             ropeAngle = 0;
             timeLeft = 60; // Reset 60 second timer (1 minute)
             collisionEnabled = false; // Disable collision initially
             lastDangerZone = false; // Reset danger zone tracking
+            dangerZoneScored = false; // Reset scoring flag
 
             // Show instructions at top, then hide after 2 seconds
             const instructions = document.getElementById('instructions');
@@ -1377,7 +1610,8 @@
             bouquet.classList.remove('active');
 
             document.getElementById('score').textContent = score;
-            document.getElementById('speed').textContent = '1.0';
+            document.getElementById('speed').textContent = selectedStartSpeed.toFixed(2);
+            document.getElementById('lives').textContent = lives;
             document.getElementById('gameOver').style.display = 'none';
 
             // Update timer display
@@ -1399,18 +1633,14 @@
             setTimeout(() => {
                 collisionEnabled = true;
             }, 2000);
-
-            // Score increase every rotation (slower with new speed)
-            ropeCheckInterval = setInterval(() => {
-                if (gameRunning) {
-                    updateScore();
-                }
-            }, ropeSpeed * 1000);
         }
 
         // Restart game
         function restartGame() {
-            startGame();
+            // Hide game over screen
+            document.getElementById('gameOver').style.display = 'none';
+            // Show speed selection menu
+            showSpeedSelection();
         }
 
         // Event listeners
@@ -1418,7 +1648,11 @@
             if (event.code === 'Space') {
                 event.preventDefault();
                 if (!gameRunning) {
-                    startGame();
+                    // Show speed selection if game hasn't started
+                    const speedSelection = document.getElementById('speedSelection');
+                    if (speedSelection.style.display !== 'flex') {
+                        showSpeedSelection();
+                    }
                 } else {
                     jump();
                 }
@@ -1429,7 +1663,11 @@
         document.addEventListener('touchstart', (event) => {
             event.preventDefault();
             if (!gameRunning) {
-                startGame();
+                // Show speed selection if game hasn't started
+                const speedSelection = document.getElementById('speedSelection');
+                if (speedSelection.style.display !== 'flex') {
+                    showSpeedSelection();
+                }
             } else {
                 jump();
             }
