@@ -735,8 +735,9 @@
             #gameContainer {
                 width: 95vw;
                 max-width: 400px;
-                height: 40vh;
-                min-height: 250px;
+                height: 45vh;
+                min-height: 280px;
+                margin-top: 60px;
             }
             
             #rope {
@@ -747,30 +748,104 @@
             }
             
             #ropeSvg {
-                viewBox: "0 0 400 120";
+                viewBox: "0 0 400 160";
                 width: 100%;
                 height: 100%;
             }
             
             .young-hee {
-                left: 5%;
+                left: 8%;
             }
             
             .cheol-su {
-                right: 5%;
+                right: 8%;
                 left: auto;
+            }
+            
+            #ui {
+                position: fixed;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                z-index: 100;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 10px;
+                border-radius: 10px;
+                font-size: 14px;
+            }
+            
+            #ui > div {
+                margin: 0 5px;
             }
         }
 
         /* Landscape mode mobile optimization */
         @media (max-width: 800px) and (orientation: landscape) and (max-height: 600px) {
             #gameContainer {
-                width: 80vw;
-                height: 60vh;
+                width: 70vw;
+                height: 50vh;
+                margin: 0 auto;
+                position: relative;
+                top: 50px;
+            }
+            
+            #ui {
+                position: fixed;
+                top: 5px;
+                left: 5px;
+                right: 5px;
+                z-index: 100;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background: rgba(0, 0, 0, 0.8);
+                padding: 8px 15px;
+                border-radius: 8px;
+                font-size: 12px;
+            }
+            
+            #ui > div {
+                margin: 0 8px;
             }
             
             #instructions {
+                font-size: 14px;
+                top: 60px;
+            }
+            
+            .timer {
                 font-size: 16px;
+                top: 5px;
+                right: 5px;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 320px) {
+            #gameContainer {
+                width: 98vw;
+                height: 40vh;
+                min-height: 240px;
+            }
+            
+            #ui {
+                font-size: 12px;
+                padding: 5px;
+            }
+        }
+
+        /* Prevent overlap on all mobile devices */
+        @media (max-width: 800px) {
+            body {
+                padding-top: 80px;
+            }
+            
+            #gameOverContent {
+                max-height: 80vh;
+                overflow-y: auto;
             }
         }        /* Particle effect for successful jumps */
         .particle {
