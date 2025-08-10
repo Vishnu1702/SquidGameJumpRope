@@ -698,24 +698,15 @@
 
         #instructions {
             position: fixed;
-            top: 20px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
             color: white;
-            font-size: 18px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 15px 25px;
-            border-radius: 15px;
-            z-index: 1000;
-            font-weight: bold;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            transition: opacity 0.5s ease;
-        }
-
-        #instructions.hide {
-            opacity: 0;
-            pointer-events: none;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
         }
 
         .squid-number {
@@ -774,166 +765,12 @@
             }
 
             #instructions {
-                font-size: 14px;
-                top: 60px;
+                font-size: 12px;
             }
 
             .timer {
                 font-size: 18px;
                 padding: 8px 15px;
-            }
-        }
-
-        /* Portrait mode mobile optimization */
-        @media (max-width: 480px) and (orientation: portrait) {
-            body {
-                overflow-x: hidden;
-            }
-
-            #gameContainer {
-                width: 95vw;
-                max-width: 400px;
-                height: 50vh;
-                min-height: 300px;
-                margin-top: 30px;
-                /* Reduced from 50px for even tighter layout */
-            }
-
-            #rope {
-                width: 90%;
-                left: 50%;
-                transform: translateX(-50%);
-                margin-left: 0;
-            }
-
-            #ropeSvg {
-                viewBox: "0 0 400 160";
-                width: 100%;
-                height: 100%;
-            }
-
-            .young-hee {
-                left: 8%;
-                bottom: 120px;
-                /* Reverted to original position for portrait */
-            }
-
-            .cheol-su {
-                right: 8%;
-                left: auto;
-                bottom: 120px;
-                /* Reverted to original position for portrait */
-            }
-
-            #character {
-                bottom: 120px;
-                /* Reverted to original position for portrait */
-            }
-
-            #ui {
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                right: 10px;
-                z-index: 100;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 10px;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-
-            #ui>div {
-                margin: 0 5px;
-            }
-        }
-
-        /* Landscape mode mobile optimization */
-        @media (max-width: 800px) and (orientation: landscape) and (max-height: 600px) {
-            #gameContainer {
-                width: 85vw;
-                /* Increased from 70vw to take more screen space */
-                height: 75vh;
-                /* Increased from 65vh to take more screen space */
-                margin: 0 auto;
-                position: relative;
-                top: 25px;
-                /* Greatly reduced from 50px to minimize gap */
-            }
-
-            .young-hee {
-                bottom: 100px;
-                /* Adjusted to 100px for better landscape positioning */
-            }
-
-            .cheol-su {
-                bottom: 100px;
-                /* Adjusted to 100px for better landscape positioning */
-            }
-
-            #character {
-                bottom: 100px;
-                /* Adjusted to 100px for better landscape positioning */
-            }
-
-            #ui {
-                position: fixed;
-                top: 5px;
-                left: 5px;
-                right: 5px;
-                z-index: 100;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: rgba(0, 0, 0, 0.8);
-                padding: 8px 15px;
-                border-radius: 8px;
-                font-size: 12px;
-            }
-
-            #ui>div {
-                margin: 0 8px;
-            }
-
-            #instructions {
-                font-size: 14px;
-                top: 30px;
-                /* Reduced from 45px to bring much closer to UI */
-            }
-
-            .timer {
-                font-size: 16px;
-                top: 5px;
-                right: 5px;
-            }
-        }
-
-        /* Extra small screens */
-        @media (max-width: 320px) {
-            #gameContainer {
-                width: 98vw;
-                height: 40vh;
-                min-height: 240px;
-            }
-
-            #ui {
-                font-size: 12px;
-                padding: 5px;
-            }
-        }
-
-        /* Prevent overlap on all mobile devices */
-        @media (max-width: 800px) {
-            body {
-                padding-top: 50px;
-                /* Reduced from 70px for much tighter layout */
-            }
-
-            #gameOverContent {
-                max-height: 80vh;
-                overflow-y: auto;
             }
         }
 
@@ -1028,7 +865,7 @@
     </div>
 
     <div id="instructions">
-        Press SPACEBAR or TAP to jump!
+        Press SPACEBAR or TAP to jump over the metal rope! Survive for 30 seconds!
     </div>
 
     <div id="gameOver">
@@ -1244,12 +1081,12 @@
             if (progress < 0.2) {
                 // Rope starting position and beginning to rise
                 const t = progress / 0.2;
-                pathData = `M 60 70 Q ${300 + t * 40} ${70 - t * 30} 540 70`; // Adjusted to new hand level
+                pathData = `M 60 70 Q ${300 + t * 40} ${70 - t * 30} 540 70`;
             } else if (progress < 0.4) {
                 // Rope going up and over the top (safe zone)
                 const t = (progress - 0.2) / 0.2;
                 const controlY = 40 - t * 80; // Goes much higher over heads
-                pathData = `M 60 70 Q 340 ${controlY} 540 70`; // Start from new hand level
+                pathData = `M 60 70 Q 340 ${controlY} 540 70`;
             } else if (progress < 0.6) {
                 // Rope at the top (completely safe zone - high above heads)
                 const t = (progress - 0.4) / 0.2;
@@ -1262,8 +1099,8 @@
             } else {
                 // Rope at bottom - DANGER ZONE (only last 20% of rotation)
                 const t = (progress - 0.8) / 0.2;
-                const bottomY = 90 + t * 50; // Sweeps at ground level (adjusted for raised characters)
-                pathData = `M 60 70 Q 180 85 300 ${bottomY} Q 420 85 540 70`; // From proper hand level
+                const bottomY = 90 + t * 50; // Sweeps at ground level
+                pathData = `M 60 70 Q 180 85 300 ${bottomY} Q 420 85 540 70`;
             }
 
             ropePath.setAttribute('d', pathData);
@@ -1354,14 +1191,6 @@
             timeLeft = 60; // Reset 60 second timer (1 minute)
             collisionEnabled = false; // Disable collision initially
             lastDangerZone = false; // Reset danger zone tracking
-
-            // Show instructions at top, then hide after 2 seconds
-            const instructions = document.getElementById('instructions');
-            instructions.classList.remove('hide');
-            instructions.style.opacity = '1';
-            setTimeout(() => {
-                instructions.classList.add('hide');
-            }, 2000);
 
             // Reset character appearance and animations
             const character = document.getElementById('character');
