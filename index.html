@@ -735,9 +735,9 @@
             #gameContainer {
                 width: 95vw;
                 max-width: 400px;
-                height: 45vh;
-                min-height: 280px;
-                margin-top: 60px;
+                height: 50vh;
+                min-height: 300px;
+                margin-top: 80px;
             }
             
             #rope {
@@ -755,11 +755,17 @@
             
             .young-hee {
                 left: 8%;
+                bottom: 120px; /* Lower the characters to ground level */
             }
             
             .cheol-su {
                 right: 8%;
                 left: auto;
+                bottom: 120px; /* Lower the characters to ground level */
+            }
+            
+            #character {
+                bottom: 120px; /* Match player position with rope holders */
             }
             
             #ui {
@@ -786,10 +792,22 @@
         @media (max-width: 800px) and (orientation: landscape) and (max-height: 600px) {
             #gameContainer {
                 width: 70vw;
-                height: 50vh;
+                height: 65vh;
                 margin: 0 auto;
                 position: relative;
-                top: 50px;
+                top: 80px; /* More space for character heads */
+            }
+            
+            .young-hee {
+                bottom: 80px; /* Ensure heads are visible */
+            }
+            
+            .cheol-su {
+                bottom: 80px; /* Ensure heads are visible */
+            }
+            
+            #character {
+                bottom: 80px; /* Match all characters at same level */
             }
             
             #ui {
@@ -840,7 +858,7 @@
         /* Prevent overlap on all mobile devices */
         @media (max-width: 800px) {
             body {
-                padding-top: 80px;
+                padding-top: 100px; /* More space for repositioned game */
             }
             
             #gameOverContent {
