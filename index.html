@@ -1457,8 +1457,8 @@
         function adjustRopeForOrientation() {
             const isPortrait = window.innerHeight > window.innerWidth;
             if (isPortrait && window.innerWidth <= 480) {
-                // Portrait mode: keep original width but lower to reach ground level
-                ropePath.setAttribute('d', 'M 60 90 Q 300 95 540 90');
+                // Portrait mode: lower rope to actual ground level (feet level)
+                ropePath.setAttribute('d', 'M 60 110 Q 300 115 540 110');
             } else {
                 // Landscape mode: keep original position
                 ropePath.setAttribute('d', 'M 60 70 Q 300 75 540 70');
@@ -1470,9 +1470,9 @@
             const isPortrait = window.innerHeight > window.innerWidth;
             if (isPortrait && window.innerWidth <= 480) {
                 return {
-                    startY: 90,
-                    endY: 90,
-                    baseY: 90,
+                    startY: 110,  // Lower to actual ground level
+                    endY: 110,
+                    baseY: 110,
                     maxWidth: 540  // Keep original width, only change Y coordinates
                 };
             } else {
