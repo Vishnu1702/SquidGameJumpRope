@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squid Game - Jump Rope Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #87CEEB 0%, #4682B4 50%, #2F4F4F 100%);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #2c5530;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background: linear-gradient(180deg, #654321 0%, #8B4513 20%, #A0522D 100%);
+            border: 4px solid #2c2c2c;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+
+        /* Bridge styling */
+        .bridge {
+            position: absolute;
+            bottom: 80px;
+            left: 50px;
+            right: 50px;
+            height: 20px;
+            background: linear-gradient(90deg, #8B7D6B 0%, #A0A0A0 50%, #8B7D6B 100%);
+            border: 2px solid #696969;
+            border-radius: 5px;
+        }
+
+        .bridge::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 40%;
+            width: 20%;
+            height: 10px;
+            background: transparent;
+            border: 2px dashed #ff6b9d;
+        }
+
+        /* Railway tracks */
+        .railway-tracks {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: repeating-linear-gradient(
+                90deg,
+                #4A4A4A 0px,
+                #4A4A4A 20px,
+                #2F2F2F 20px,
+                #2F2F2F 40px
+            );
+        }
+
+        #character {
+            position: absolute;
+            width: 30px;
+            height: 50px;
+            background: #00a86b;
+            border-radius: 15px 15px 8px 8px;
+            transition: transform 0.2s ease;
+            z-index: 10;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            --feet-color: #2c5530;
+            --feet-glow: none;
+        }
+
+        #character::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: #ffdbac;
+            border-radius: 50%;
+            border: 2px solid #2c5530;
+        }
+
+        #character::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 25px;
+            height: 8px;
+            background: var(--feet-color);
+            border-radius: 12px;
+            box-shadow: var(--feet-glow);
+            transition: background 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        .character-jumping {
+            transform: translateX(-50%) translateY(-40px) !important;
+        }
+
+        .character-falling {
+            animation: fallIntoWater 2s ease-in forwards !important;
+        }
+
+        @keyframes fallIntoWater {
+            0% {
+                transform: translateX(-50%) translateY(0px) rotate(0deg);
+                opacity: 1;
+            }
+            30% {
+                transform: translateX(-50%) translateY(20px) rotate(180deg);
+                opacity: 1;
+            }
+            70% {
+                transform: translateX(-50%) translateY(200px) rotate(360deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateX(-50%) translateY(400px) rotate(540deg);
+                opacity: 0;
+            }
+        }
+
+        /* Water splash effect */
+        .water-splash {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 60px;
+            background: radial-gradient(ellipse at center, 
+                rgba(0, 150, 255, 0.6) 0%, 
+                rgba(0, 100, 200, 0.4) 50%, 
+                transparent 100%);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 5;
+        }
+
+        .water-splash.active {
+            animation: splash 1.5s ease-out forwards;
+        }
+
+        @keyframes splash {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(2);
+            }
+        }
+
+        /* Success bouquet celebration */
+        .success-bouquet {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .success-bouquet.active {
+            animation: celebrateBouquet 3s ease-out forwards;
+        }
+
+        @keyframes celebrateBouquet {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+            }
+            40% {
+                transform: translate(-50%, -50%) scale(1) rotate(-5deg);
+            }
+            60% {
+                transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+            }
+            80% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        .bouquet-flowers {
+            font-size: 60px;
+            text-align: center;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+
+        .bouquet-message {
+            background: linear-gradient(135deg, #ff6b9d, #4ecdc4);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Confetti animation */
+        .confetti {
+            position: fixed;
+            top: -10px;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background: #ff6b9d;
+            animation: confettiFall 3s linear infinite;
+            z-index: 999;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100px) translateX(-50%) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) translateX(-50%) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Young-hee (left character holding rope) */
+        .young-hee {
+            position: absolute;
+            left: 20px;
+            bottom: 100px;
+            width: 60px;
+            height: 80px;
+            z-index: 5;
+        }
+
+        .young-hee-body {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(180deg, #ff69b4 0%, #ff1493 100%);
+            border-radius: 20px 20px 10px 10px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .young-hee-head {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #ffdbac;
+            border-radius: 50%;
+            border: 3px solid #ff69b4;
+        }
+
+        .young-hee-head::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 4px;
+            height: 4px;
+            background: #000;
+            border-radius: 50%;
+            box-shadow: 10px 0 0 #000, 2px 6px 0 -1px #ff6b9d, 8px 6px 0 -1px #ff6b9d;
+        }
+
+        .young-hee-head::after {
+            content: '�';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 6px;
+        }
+
+        .young-hee-arm {
+            position: absolute;
+            width: 8px;
+            height: 30px;
+            background: #ffdbac;
+            border-radius: 4px;
+            right: -12px;
+            top: 10px;
+            transform-origin: top;
+            animation: hold-rope-left 3s linear infinite;
+        }
+
+        .young-hee-arm::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            right: -2px;
+            width: 6px;
+            height: 6px;
+            background: #8B4513;
+            border-radius: 50%;
+            border: 1px solid #654321;
+        }
+
+        /* Cheol-su (right character holding rope) */
+        .cheol-su {
+            position: absolute;
+            right: 20px;
+            bottom: 100px;
+            width: 60px;
+            height: 80px;
+            z-index: 5;
+        }
+
+        .cheol-su-body {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(180deg, #4169E1 0%, #0000CD 100%);
+            border-radius: 20px 20px 10px 10px;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .cheol-su-head {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #ffdbac;
+            border-radius: 50%;
+            border: 3px solid #4169E1;
+        }
+
+        .cheol-su-head::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            width: 4px;
+            height: 4px;
+            background: #000;
+            border-radius: 50%;
+            box-shadow: 10px 0 0 #000, 2px 6px 0 -1px #4169E1, 8px 6px 0 -1px #4169E1;
+        }
+
+        .cheol-su-head::after {
+            content: '�';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 6px;
+        }
+
+        .cheol-su-arm {
+            position: absolute;
+            width: 8px;
+            height: 30px;
+            background: #ffdbac;
+            border-radius: 4px;
+            left: -12px;
+            top: 10px;
+            transform-origin: top;
+            animation: hold-rope-right 3s linear infinite;
+        }
+
+        .cheol-su-arm::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: -2px;
+            width: 6px;
+            height: 6px;
+            background: #8B4513;
+            border-radius: 50%;
+            border: 1px solid #654321;
+        }
+
+        @keyframes hold-rope-left {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(-30deg); }
+            50% { transform: rotate(-60deg); }
+            75% { transform: rotate(-30deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        @keyframes hold-rope-right {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(30deg); }
+            50% { transform: rotate(60deg); }
+            75% { transform: rotate(30deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        #rope {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            z-index: 8;
+            width: 100%;
+            height: 150px;
+        }
+
+        /* Flexible rope using SVG path */
+        #ropeSvg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .rope-path {
+            fill: none;
+            stroke: #808080;
+            stroke-width: 4;
+            stroke-linecap: round;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* Rope swinging animation - realistic jump rope motion */
+        .rope-swinging {
+            animation: jump-rope-swing linear infinite;
+        }
+
+        @keyframes jump-rope-swing {
+            0% {
+                /* Starting position - rope at top left */
+            }
+            25% {
+                /* Rope coming down on left side */
+            }
+            50% {
+                /* Rope at bottom - danger zone */
+            }
+            75% {
+                /* Rope going up on right side */
+            }
+            100% {
+                /* Back to start */
+            }
+        }
+
+        /* Remove the old rope styling */
+        #rope::before,
+        #rope::after {
+            display: none;
+        }
+
+        /* Railway lights */
+        .railway-lights {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .railway-light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background: #ff0000;
+            box-shadow: 0 0 10px rgba(255,0,0,0.5);
+        }
+
+        .railway-light.green {
+            background: #00ff00;
+            box-shadow: 0 0 10px rgba(0,255,0,0.5);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Timer display */
+        .timer {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b9d;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #ff6b9d;
+        }
+
+        /* Flower abyss at bottom */
+        .flower-abyss {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(180deg, #654321 0%, #000000 100%);
+            overflow: hidden;
+        }
+
+        .flower-abyss::before {
+            content: '🌸 🌺 🌸 🌺 🌸 🌺 🌸 🌺 🌸 🌺';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 16px;
+            opacity: 0.6;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        #ui {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ff6b9d;
+        }
+
+        /* Rope swinging animation */
+        .rope-swinging {
+            animation: jump-rope-swing linear infinite;
+        }
+
+        @keyframes rope-spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #gameOver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        #gameOverContent {
+            text-align: center;
+            color: white;
+            padding: 40px;
+            background: linear-gradient(135deg, #ff6b9d, #ff8e8e);
+            border-radius: 20px;
+            border: 4px solid #2c5530;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #gameOverContent h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #2c5530;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+        }
+
+        #gameOverContent p {
+            font-size: 24px;
+            margin-bottom: 30px;
+            color: #2c5530;
+        }
+
+        button {
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            padding: 15px 30px;
+            background: #00a86b;
+            color: white;
+            border: 3px solid #2c5530;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #2c5530;
+            transform: scale(1.05);
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: white;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .squid-number {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 4px solid #2c5530;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b9d;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 480px) {
+            #gameContainer {
+                width: 350px;
+                height: 300px;
+            }
+            
+            #rope {
+                width: 280px;
+                margin-left: -140px;
+            }
+            
+            #character {
+                width: 25px;
+                height: 40px;
+            }
+            
+            .young-hee, .cheol-su {
+                width: 45px;
+                height: 60px;
+            }
+            
+            .young-hee-body, .cheol-su-body {
+                width: 30px;
+                height: 45px;
+            }
+            
+            #ui {
+                font-size: 16px;
+                padding: 10px;
+            }
+            
+            #gameOverContent h1 {
+                font-size: 28px;
+            }
+            
+            #instructions {
+                font-size: 12px;
+            }
+
+            .timer {
+                font-size: 18px;
+                padding: 8px 15px;
+            }
+        }        /* Particle effect for successful jumps */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00a86b;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particle 0.8s ease-out forwards;
+        }
+
+        @keyframes particle {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0) translateY(-50px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="ui">
+        <div>Score: <span id="score">0</span></div>
+        <div>Speed: <span id="speed">1.0</span>x</div>
+        <div>Time: <span id="timeLeft">01:00</span></div>
+    </div>
+
+    <div class="squid-number">456</div>
+
+    <div id="gameContainer">
+        <!-- Railway lights -->
+        <div class="railway-lights">
+            <div class="railway-light" id="light1"></div>
+            <div class="railway-light" id="light2"></div>
+            <div class="railway-light" id="light3"></div>
+        </div>
+
+        <!-- Timer display -->
+        <div class="timer" id="gameTimer">01:00</div>
+
+        <!-- Young-hee (left character) -->
+        <div class="young-hee">
+            <div class="young-hee-body">
+                <div class="young-hee-head"></div>
+                <div class="young-hee-arm"></div>
+            </div>
+        </div>
+
+        <!-- Cheol-su (right character) -->
+        <div class="cheol-su">
+            <div class="cheol-su-body">
+                <div class="cheol-su-head"></div>
+                <div class="cheol-su-arm"></div>
+            </div>
+        </div>
+
+        <!-- Player character -->
+        <div id="character"></div>
+        
+        <!-- Water splash effect -->
+        <div id="waterSplash" class="water-splash"></div>
+
+        <!-- Success bouquet celebration -->
+        <div id="successBouquet" class="success-bouquet">
+            <div class="bouquet-flowers">💐🌸🌺🌻🌷</div>
+            <div class="bouquet-message">Congratulations!<br>You Survived!</div>
+        </div>
+        
+        <!-- Flexible rope using SVG -->
+        <div id="rope">
+            <svg id="ropeSvg" viewBox="0 0 600 150">
+                <path id="ropePath" class="rope-path" d="M 60 70 Q 300 75 540 70"></path>
+            </svg>
+        </div>
+
+        <!-- Bridge -->
+        <div class="bridge"></div>
+
+        <!-- Railway tracks -->
+        <div class="railway-tracks"></div>
+
+        <!-- Flower abyss -->
+        <div class="flower-abyss"></div>
+    </div>
+
+    <div id="instructions">
+        Press SPACEBAR or TAP to jump over the metal rope! Survive for 30 seconds!
+    </div>
+
+    <div id="gameOver">
+        <div id="gameOverContent">
+            <h1>ELIMINATED</h1>
+            <p>You failed the jump rope challenge!</p>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <button onclick="restartGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let score = 0;
+        let gameRunning = false;
+        let ropeSpeed = 3; // seconds per rotation (faster start)
+        let speedMultiplier = 1.0; // Direct speed multiplier for display
+        let character = document.getElementById('character');
+        let rope = document.getElementById('rope');
+        let ropePath = document.getElementById('ropePath');
+        let gameContainer = document.getElementById('gameContainer');
+        let isJumping = false;
+        let ropeAngle = 0;
+        let gameLoop;
+        let ropeCheckInterval;
+        let timerInterval;
+        let timeLeft = 60; // 60 seconds (1 minute)
+        let gameStarted = false;
+        let collisionEnabled = false; // Add collision delay
+        let lastDangerZone = false; // Track if we were in danger zone last frame
+
+        // Audio context for sound effects
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Timer functions
+        function updateTimer() {
+            if (!gameRunning) return;
+            
+            timeLeft--;
+            
+            // Prevent negative time display
+            if (timeLeft < 0) {
+                timeLeft = 0;
+            }
+            
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const timeString = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            document.getElementById('gameTimer').textContent = timeString;
+            document.getElementById('timeLeft').textContent = timeString;
+            
+            if (timeLeft <= 0) {
+                // Stop the timer immediately to prevent negative values
+                clearInterval(timerInterval);
+                timeLeft = 0;
+                document.getElementById('gameTimer').textContent = "00:00";
+                document.getElementById('timeLeft').textContent = "00:00";
+                
+                // Player survived the full 60 seconds - they win!
+                showSuccessCelebration();
+                // Remove the duplicate alert - celebration is enough
+                setTimeout(() => {
+                    gameOver();
+                }, 3000);
+            }
+        }
+
+        // Railway lights control
+        function activateRailwayLights() {
+            const lights = ['light1', 'light2', 'light3'];
+            lights.forEach((lightId, index) => {
+                setTimeout(() => {
+                    document.getElementById(lightId).classList.add('green');
+                }, index * 500);
+            });
+        }
+
+        function resetRailwayLights() {
+            const lights = ['light1', 'light2', 'light3'];
+            lights.forEach(lightId => {
+                document.getElementById(lightId).classList.remove('green');
+            });
+        }
+
+        // Simple beep sound for jump (base64 encoded short beep)
+        function playJumpSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.1);
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // Game over sound
+        function playGameOverSound() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+
+        // Create particle effect
+        function createParticles(x, y) {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.transform = `translate(${(Math.random() - 0.5) * 40}px, ${(Math.random() - 0.5) * 40}px)`;
+                gameContainer.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 800);
+            }
+        }
+
+        // Jump function
+        function jump() {
+            if (isJumping || !gameRunning) return;
+
+            isJumping = true;
+            character.classList.add('character-jumping');
+            playJumpSound();
+
+            // Create particle effect
+            const rect = character.getBoundingClientRect();
+            const containerRect = gameContainer.getBoundingClientRect();
+            createParticles(
+                rect.left - containerRect.left + rect.width / 2,
+                rect.top - containerRect.top + rect.height
+            );
+
+            setTimeout(() => {
+                isJumping = false;
+                character.classList.remove('character-jumping');
+            }, 200);
+        }
+
+        // Check collision with rope
+        function checkCollision() {
+            if (!gameRunning || !collisionEnabled) return;
+
+            // Collision detection for predictable jump rope rotation
+            const progress = (ropeAngle % 360) / 360;
+            
+            // Very precise danger zone: only when rope is actually at ground level (feet level)
+            // This corresponds to when bottomY >= 135 (actual ground/feet level)
+            const inDangerZone = progress > 0.94 && progress < 0.98;
+            
+            // If we're in danger zone and player is not jumping, they fail
+            if (inDangerZone && !isJumping) {
+                // Only trigger collision once per danger zone entry
+                if (!lastDangerZone) {
+                    // Add visual feedback - character falls into water
+                    const character = document.getElementById('character');
+                    const waterSplash = document.getElementById('waterSplash');
+                    
+                    // Start falling animation
+                    character.classList.add('character-falling');
+                    
+                    // Show water splash after delay
+                    setTimeout(() => {
+                        waterSplash.classList.add('active');
+                    }, 1400); // Splash when character hits bottom
+                    
+                    // Game over after falling animation
+                    setTimeout(() => {
+                        gameOver();
+                    }, 2000);
+                }
+            }
+            
+            // Update the danger zone tracking
+            lastDangerZone = inDangerZone;
+        }
+
+        // Update flexible rope position
+        function updateRopeShape() {
+            if (!gameRunning) return;
+
+            // Calculate rope curve based on animation progress
+            const progress = (ropeAngle % 360) / 360;
+            
+            // Create smoother, more predictable jump rope rotation
+            // Updated coordinates for wider gap between holders
+            // Young-hee at x=60, Cheol-su at x=540
+            
+            let pathData;
+            
+            if (progress < 0.2) {
+                // Rope starting position and beginning to rise
+                const t = progress / 0.2;
+                pathData = `M 60 70 Q ${300 + t * 40} ${70 - t * 30} 540 70`;
+            } else if (progress < 0.4) {
+                // Rope going up and over the top (safe zone)
+                const t = (progress - 0.2) / 0.2;
+                const controlY = 40 - t * 80; // Goes much higher over heads
+                pathData = `M 60 70 Q 340 ${controlY} 540 70`;
+            } else if (progress < 0.6) {
+                // Rope at the top (completely safe zone - high above heads)
+                const t = (progress - 0.4) / 0.2;
+                pathData = `M 60 70 Q 300 -40 540 70`; // Very high arc well above everything
+            } else if (progress < 0.8) {
+                // Rope starting to come down (still safe)
+                const t = (progress - 0.6) / 0.2;
+                const controlY = -40 + t * 80; // Gradually coming down from high position
+                pathData = `M 60 70 Q 260 ${controlY} 300 ${70 + t * 20} Q 340 ${controlY} 540 70`;
+            } else {
+                // Rope at bottom - DANGER ZONE (only last 20% of rotation)
+                const t = (progress - 0.8) / 0.2;
+                const bottomY = 90 + t * 50; // Sweeps at ground level
+                pathData = `M 60 70 Q 180 85 300 ${bottomY} Q 420 85 540 70`;
+            }
+            
+            ropePath.setAttribute('d', pathData);
+            
+            // Visual feedback: Make rope glow red only when at actual ground/feet level
+            const inDangerZone = progress > 0.94 && progress < 0.98;
+            if (inDangerZone) {
+                ropePath.style.stroke = '#ff4444';
+                ropePath.style.filter = 'drop-shadow(0 0 8px #ff0000)';
+            } else {
+                ropePath.style.stroke = '#654321';
+                ropePath.style.filter = 'none';
+            }
+        }
+
+        // Update rope rotation
+        function updateRope() {
+            if (!gameRunning) return;
+
+            ropeAngle += (360 / (ropeSpeed * 60)); // 60 FPS assumption
+            updateRopeShape();
+            checkCollision();
+        }
+
+        // Game over
+        // Success celebration with bouquet and confetti
+        function showSuccessCelebration() {
+            const bouquet = document.getElementById('successBouquet');
+            bouquet.classList.add('active');
+            
+            // Create confetti effect
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 100);
+            }
+        }
+
+        function createConfetti() {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.backgroundColor = ['#ff6b9d', '#4ecdc4', '#45b7d1', '#f9ca24', '#f0932b'][Math.floor(Math.random() * 5)];
+            confetti.style.animationDelay = Math.random() * 3 + 's';
+            document.body.appendChild(confetti);
+            
+            // Remove confetti after animation
+            setTimeout(() => {
+                confetti.remove();
+            }, 3000);
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            clearInterval(gameLoop);
+            clearInterval(ropeCheckInterval);
+            clearInterval(timerInterval);
+
+            // Reset rope to initial position
+            ropePath.setAttribute('d', 'M 60 70 Q 300 75 540 70');
+            resetRailwayLights();
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameOver').style.display = 'flex';
+
+            playGameOverSound();
+        }
+
+        // Update score and speed
+        function updateScore() {
+            score++;
+            document.getElementById('score').textContent = score;
+
+            // Increase speed more frequently every 2 points with smaller increments
+            if (score % 2 === 0) {
+                speedMultiplier += 0.25; // 1.0x → 1.25x → 1.50x → 1.75x → 2.0x etc.
+                ropeSpeed = 3 / speedMultiplier; // Faster rotation
+                document.getElementById('speed').textContent = speedMultiplier.toFixed(2) + 'x';
+            }
+        }
+
+        // Start game
+        function startGame() {
+            gameRunning = true;
+            score = 0;
+            ropeSpeed = 3; // Faster start
+            speedMultiplier = 1.0; // Reset speed multiplier
+            ropeAngle = 0;
+            timeLeft = 60; // Reset 60 second timer (1 minute)
+            collisionEnabled = false; // Disable collision initially
+            lastDangerZone = false; // Reset danger zone tracking
+
+            // Reset character appearance and animations
+            const character = document.getElementById('character');
+            const waterSplash = document.getElementById('waterSplash');
+            const bouquet = document.getElementById('successBouquet');
+            character.style.background = '#00a86b';
+            character.style.boxShadow = 'none';
+            character.style.setProperty('--feet-color', '#2c5530');
+            character.style.setProperty('--feet-glow', 'none');
+            character.classList.remove('character-falling');
+            waterSplash.classList.remove('active');
+            bouquet.classList.remove('active');
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('speed').textContent = '1.0';
+            document.getElementById('gameOver').style.display = 'none';
+            
+            // Update timer display
+            const timeString = "01:00";
+            document.getElementById('gameTimer').textContent = timeString;
+            document.getElementById('timeLeft').textContent = timeString;
+
+            // Activate railway lights sequence
+            activateRailwayLights();
+
+            // Start rope animation (controlled by JavaScript, not CSS)
+            // Game loop at 60 FPS
+            gameLoop = setInterval(updateRope, 1000 / 60);
+
+            // Timer countdown
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Enable collision after 2 seconds to give player time to get ready
+            setTimeout(() => {
+                collisionEnabled = true;
+            }, 2000);
+
+            // Score increase every rotation (slower with new speed)
+            ropeCheckInterval = setInterval(() => {
+                if (gameRunning) {
+                    updateScore();
+                }
+            }, ropeSpeed * 1000);
+        }
+
+        // Restart game
+        function restartGame() {
+            startGame();
+        }
+
+        // Event listeners
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                event.preventDefault();
+                if (!gameRunning) {
+                    startGame();
+                } else {
+                    jump();
+                }
+            }
+        });
+
+        // Touch events for mobile
+        document.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            if (!gameRunning) {
+                startGame();
+            } else {
+                jump();
+            }
+        });
+
+        // Prevent scrolling on mobile
+        document.addEventListener('touchmove', (event) => {
+            event.preventDefault();
+        }, { passive: false });
+
+        // Initialize audio context on first user interaction
+        document.addEventListener('click', () => {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+
+        document.addEventListener('touchstart', () => {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        }, { once: true });
+
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            // Game starts when user presses space or taps
+        });
+    </script>
+</body>
+
+</html>
